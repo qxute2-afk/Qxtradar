@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QXTradar</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080810;--s:#0f0f1a;--s2:#161625;--bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.13);--tx:#eeeef8;--mu:#7070a0;--dm:#40405a;--bl:#4a9eff;--z:#00e5a0;--j:#7b5cff;--b:#ff5c8a;--k:#f0a500}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(74,158,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(74,158,255,.018) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.95);backdrop-filter:blur(18px);border-bottom:1px solid var(--bd);padding:0 24px}
+.nav-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;height:54px;gap:14px}
+.logo{display:flex;align-items:center;gap:9px;flex-shrink:0;text-decoration:none}
+.lm{width:28px;height:28px;background:var(--bl);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.lm svg{width:14px;height:14px}
+.lt{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px}
+.lt b{color:var(--bl);font-weight:400}
+.tabs{display:flex;gap:2px;flex:1;justify-content:center}
+.tab{background:transparent;border:none;color:var(--mu);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:6px 14px;border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.tab:hover{color:var(--tx);background:rgba(255,255,255,.04)}
+.tab.on{color:var(--bl);background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.2)}
+.nr{display:flex;align-items:center;gap:9px;flex-shrink:0}
+.sp{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--bd);border-radius:100px;padding:4px 11px;font-size:10px;color:var(--mu);font-family:'DM Mono',monospace}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--dm);flex-shrink:0}
+.sdot.live{background:var(--z);animation:bk 2s ease-in-out infinite}
+.sdot.loading{background:var(--k);animation:bk .5s ease-in-out infinite}
+.sdot.error{background:var(--b)}
+@keyframes bk{0%,100%{opacity:1}50%{opacity:.25}}
+.btn-p{background:var(--bl);color:#fff;border:none;border-radius:7px;padding:8px 16px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:opacity .15s,transform .1s}
+.btn-p:hover{opacity:.85}.btn-p:active{transform:scale(.97)}.btn-p:disabled{opacity:.35;cursor:not-allowed}
+.btn-p svg{width:12px;height:12px;flex-shrink:0}
+.btn-p.spin svg{animation:spin 1s linear infinite}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+main{max-width:1280px;margin:0 auto;padding:24px;position:relative;z-index:1}
+.pg{display:none}.pg.on{display:block;animation:fi .2s ease}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.loadbar{height:2px;background:var(--bd);border-radius:2px;overflow:hidden;margin-bottom:20px;display:none}
+.lbfill{height:100%;width:0;background:linear-gradient(90deg,var(--bl),#b06cff);border-radius:2px;transition:width .4s ease}
+.hero{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.hlb{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:.18em;color:var(--mu)}
+.hdt{font-family:'DM Mono',monospace;font-size:11px;color:var(--mu);margin-top:2px}
+.hmeta{font-family:'DM Mono',monospace;font-size:10px;color:var(--mu)}
+
+/* TOGGLE hoje/amanhã */
+.toggle-row{display:flex;align-items:center;gap:8px;margin-bottom:18px}
+.toggle-label{font-size:12px;color:var(--mu)}
+.toggle-wrap{display:flex;background:var(--s);border:1px solid var(--bd);border-radius:8px;padding:3px;gap:2px}
+.tgl{background:transparent;border:none;color:var(--mu);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:5px 16px;border-radius:6px;cursor:pointer;transition:all .15s}
+.tgl.on{background:var(--bl);color:#fff}
+.tgl:hover:not(.on){color:var(--tx)}
+
+/* HOUSES */
+.houses{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.hcard{background:var(--s);border:1px solid var(--bd);border-radius:11px;padding:13px 15px;display:flex;align-items:center;gap:10px;transition:border-color .3s}
+.hcard.oz{border-color:rgba(0,229,160,.3)}.hcard.oj{border-color:rgba(123,92,255,.3)}.hcard.ob{border-color:rgba(255,92,138,.3)}.hcard.ok{border-color:rgba(240,165,0,.3)}
+.hdot{width:9px;height:9px;border-radius:50%;flex-shrink:0;background:var(--dm);transition:background .3s}
+.hn{font-size:13px;font-weight:500}.hst{font-size:11px;color:var(--mu);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hct{font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;color:var(--dm);margin-left:auto;transition:color .3s}
+.sh{display:flex;align-items:center;gap:11px;margin:20px 0 12px}
+.sl{flex:1;height:1px;background:var(--bd)}
+.stag{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:.12em;white-space:nowrap;color:var(--mu)}
+.stag.tz{color:var(--z)}.stag.tj{color:var(--j)}.stag.tb{color:var(--b)}.stag.tk{color:var(--k)}.stag.tbl{color:var(--bl)}
+.pg3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.pc{background:var(--s);border:1px solid var(--bd);border-radius:11px;padding:13px}
+.ptop{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.pty{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:2px 7px;border-radius:3px}
+.tz2{background:rgba(0,229,160,.1);color:var(--z)}.tj2{background:rgba(123,92,255,.1);color:var(--j)}.tb2{background:rgba(255,92,138,.1);color:var(--b)}.tk2{background:rgba(240,165,0,.1);color:var(--k)}
+.pnew{font-size:9px;font-weight:700;color:var(--z)}
+.ptit{font-size:13px;font-weight:500;margin-bottom:5px;line-height:1.3}
+.pdsc{font-size:12px;color:var(--mu);line-height:1.55;margin-bottom:9px}
+.pft{padding-top:8px;border-top:1px solid var(--bd);font-size:10px;color:var(--dm);font-family:'DM Mono',monospace}
+
+/* BETS */
+.bets-layout{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.bet-block{background:var(--s);border:1px solid var(--bd);border-radius:13px;overflow:hidden}
+.bet-head{padding:13px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.bet-head-left{}
+.bet-type-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.bet-type-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:.12em;color:var(--mu)}
+.casa-chip{display:inline-flex;align-items:center;padding:2px 10px;border-radius:100px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border:1px solid}
+.bet-odd-big{font-family:'Bebas Neue',sans-serif;font-size:32px;line-height:1}
+.bet-odd-big.gn{color:var(--z)}.bet-odd-big.am{color:var(--k)}.bet-odd-big.pk{color:var(--b)}.bet-odd-big.bl{color:var(--bl)}
+.bet-odd-sub{font-size:11px;color:var(--mu);font-family:'DM Sans',sans-serif;margin-left:4px}
+.cbdg{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 9px;border-radius:100px}
+.ca{background:rgba(0,229,160,.1);color:var(--z)}.cm{background:rgba(240,165,0,.1);color:var(--k)}.cb{background:rgba(255,92,138,.1);color:var(--b)}
+.bet-motivo{font-size:11px;color:var(--mu);padding:7px 16px;border-bottom:1px solid var(--bd);font-style:italic}
+.jogo-card{border-bottom:1px solid var(--bd);padding:10px 16px}
+.jogo-card:last-child{border-bottom:none}
+.jogo-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.jogo-hora{font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);flex-shrink:0}
+.jogo-times{font-size:12px;font-weight:500;flex:1}
+.jogo-comp{font-size:10px;color:var(--dm)}
+.jogo-odd-total{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--z);flex-shrink:0}
+.criar-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.2);border-radius:4px;padding:1px 7px;font-size:9px;font-weight:600;color:var(--bl);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.mercados-list{display:flex;flex-direction:column;gap:3px}
+.mercado-row{display:flex;align-items:center;justify-content:space-between;background:var(--s2);border-radius:5px;padding:5px 9px}
+.mercado-desc{font-size:11px;color:var(--tx)}
+.mercado-odd{font-family:'DM Mono',monospace;font-size:11px;color:var(--z);font-weight:500}
+.bet-footer{padding:10px 16px;border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.bet-aviso{font-size:10px;color:var(--dm);font-style:italic;flex:1}
+.btn-copy{background:var(--s2);border:1px solid var(--bd2);border-radius:6px;padding:5px 12px;font-size:11px;font-weight:500;color:var(--mu);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.btn-copy:hover{color:var(--tx);border-color:var(--bl)}
+.btn-copy.copied{color:var(--z);border-color:rgba(0,229,160,.4)}
+
+/* APOSTA SEGURA */
+.segura-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;margin-bottom:8px}
+.seg-card{background:var(--s);border:1px solid var(--bd);border-radius:10px;padding:12px}
+.seg-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.seg-jogo{font-size:12px;font-weight:500;margin-bottom:3px}
+.seg-comp{font-size:10px;color:var(--mu);margin-bottom:6px}
+.seg-mercado{font-size:11px;background:var(--s2);padding:4px 9px;border-radius:5px;color:var(--tx);margin-bottom:5px}
+.seg-analise{font-size:10px;color:var(--mu);line-height:1.5}
+.seg-odd{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--z)}
+
+/* SUPER ODDS */
+.super-odds-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}
+.so-card{background:var(--s);border:2px solid rgba(74,158,255,.25);border-radius:13px;overflow:hidden;position:relative}
+.so-badge{position:absolute;top:0;right:0;font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:.1em;padding:3px 12px;border-radius:0 11px 0 7px;color:#fff}
+.so-head{padding:13px 16px;border-bottom:1px solid var(--bd);display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px}
+.so-casa{display:inline-flex;align-items:center;padding:3px 11px;border-radius:100px;border:1px solid;font-size:11px;font-weight:600;margin-bottom:7px}
+.so-jogo{font-size:13px;font-weight:500}
+.so-info{font-size:10px;color:var(--mu);margin-top:2px}
+.so-odd-num{font-family:'Bebas Neue',sans-serif;font-size:44px;line-height:1;color:var(--bl);text-align:right}
+.so-normal{font-size:10px;color:var(--mu);text-align:right;margin-top:2px}
+.so-body{padding:12px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.so-fl label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);display:block;margin-bottom:4px}
+.so-fl p{font-size:12px;color:var(--tx);line-height:1.5}
+.so-footer{padding:8px 16px;border-top:1px solid var(--bd);font-size:10px;color:var(--dm);font-style:italic}
+
+/* CRIATIVOS */
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.cc{background:var(--s);border:1px solid var(--bd);border-radius:13px;overflow:hidden}
+.ch{padding:12px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.cn{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1;color:var(--bd2)}
+.cr{display:flex;align-items:center;gap:6px}
+.cbody{padding:14px 16px;display:flex;flex-direction:column;gap:11px}
+.cf label{display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);margin-bottom:4px}
+.cf p{font-size:12px;color:var(--tx);line-height:1.6}
+.cf.cta{background:rgba(74,158,255,.05);border:1px solid rgba(74,158,255,.15);border-radius:7px;padding:9px 11px}
+.cf.cta label{color:var(--bl)}
+.cf.dk{background:rgba(255,255,255,.02);border-radius:7px;padding:9px 11px}
+.cf.dk label{color:var(--dm)}.cf.dk p{color:var(--mu);font-size:11px}
+.cf-dur{display:inline-block;background:var(--s2);border:1px solid var(--bd);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--mu);margin-top:6px;font-family:'DM Mono',monospace}
+
+/* CALENDARIO */
+.calbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:9px}
+.calmth{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.06em}
+.calnav{display:flex;gap:5px}
+.nb{background:var(--s);border:1px solid var(--bd);border-radius:6px;padding:5px 12px;font-size:11px;color:var(--mu);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.nb:hover{color:var(--tx)}
+.rb{background:var(--bl);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;display:flex;align-items:center;gap:4px}
+.leg{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.li{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--mu)}
+.ld{width:7px;height:7px;border-radius:50%}
+.champ{background:#f0a500}.prem{background:#7b5cff}.liga{background:#ff5c8a}.serA{background:#00b4d8}
+.bund{background:#e63946}.l1{background:#4a9eff}.lib{background:#00e5a0}.sula{background:#ff9f1c}
+.brA{background:#2ec4b6}.brB{background:#e6914a}.brC{background:#a78bfa}.nord{background:#ff3366}.outros{background:#666}
+.fts{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.ft{background:var(--s);border:1px solid var(--bd);border-radius:100px;padding:4px 11px;font-size:10px;font-weight:500;color:var(--mu);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.ft:hover{color:var(--tx)}.ft.on{color:var(--bl);border-color:rgba(74,158,255,.35);background:rgba(74,158,255,.08)}
+.dg{margin-bottom:12px}
+.dl{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.dd{font-family:'DM Mono',monospace;font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}
+.dline{flex:1;height:1px;background:var(--bd)}
+.dtot{font-size:10px;color:var(--dm);font-family:'DM Mono',monospace;white-space:nowrap}
+.ms{display:flex;flex-direction:column;gap:3px}
+.mc{background:var(--s);border:1px solid var(--bd);border-radius:8px;padding:8px 12px;display:grid;grid-template-columns:52px 9px 1fr auto;align-items:center;gap:8px}
+.mc:hover{border-color:rgba(74,158,255,.18)}
+.mc.hl{border-left:3px solid var(--bl)}.mc.pe{border-left:3px solid var(--b)}.mc.nb2{border-left:3px solid #ff3366}
+.mhora{font-family:'DM Mono',monospace;font-size:11px;color:var(--mu)}
+.cdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.mb{min-width:0}
+.mc_comp{font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mc_teams{font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mc_fase{font-size:9px;color:var(--dm);margin-top:1px}
+.mtags{display:flex;gap:3px;align-items:center;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+.tg{font-size:9px;padding:2px 6px;border-radius:100px;white-space:nowrap}
+.tg.pe{color:var(--b);background:rgba(255,92,138,.1)}.tg.hl{color:var(--bl);background:rgba(74,158,255,.1)}
+.tg.warn{color:var(--k);background:rgba(240,165,0,.1)}.tg.tv{color:var(--dm);background:var(--s2)}.tg.nd{color:#ff3366;background:rgba(255,51,102,.1)}
+.nores{text-align:center;padding:40px;color:var(--mu);font-size:13px}
+
+/* AFILIADOS */
+.aff-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.btn-add{background:transparent;border:1px solid var(--bl);color:var(--bl);border-radius:7px;padding:7px 16px;font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px;transition:all .15s}
+.btn-add:hover{background:rgba(74,158,255,.08)}
+.asum{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.afm{background:var(--s);border:1px solid var(--bd);border-radius:11px;padding:14px}
+.aflb{font-size:10px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
+.afv{font-family:'Bebas Neue',sans-serif;font-size:24px;line-height:1;color:var(--bl)}
+.afsub{font-size:11px;color:var(--dm);margin-top:4px}
+.acards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.acard{background:var(--s);border:1px solid var(--bd);border-radius:13px;overflow:hidden}
+.acard .atop{border-top:3px solid}
+.ahead{padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between}
+.aname{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:.04em}
+.abadge{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:3px 10px;border-radius:100px}
+.astats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:0 16px 16px}
+.ast{background:var(--s2);border-radius:8px;padding:11px}
+.astl{font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.astv{font-family:'Bebas Neue',sans-serif;font-size:20px;line-height:1}
+.astd{font-size:9px;color:var(--dm);margin-top:3px}
+.calcbox{background:var(--s);border:1px solid var(--bd);border-radius:13px;padding:18px}
+.calctit{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:.1em;color:var(--mu);margin-bottom:13px}
+.calcg{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:13px}
+.calcf label{display:block;font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.calcf select,.calcf input{width:100%;background:var(--s2);border:1px solid var(--bd2);border-radius:7px;padding:8px 11px;color:var(--tx);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .15s}
+.calcf select:focus,.calcf input:focus{border-color:var(--bl)}
+.calcf select option{background:var(--s2)}
+.calcres{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.crbox{background:var(--s2);border-radius:8px;padding:13px;text-align:center}
+.crl{font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.crv{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--bl)}
+.crs{font-size:9px;color:var(--dm);margin-top:3px}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--s);border:1px solid var(--bd2);border-radius:14px;padding:24px;width:100%;max-width:480px;margin:16px}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.06em;margin-bottom:18px}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.mfield label{display:block;font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.mfield input{width:100%;background:var(--s2);border:1px solid var(--bd2);border-radius:7px;padding:9px 12px;color:var(--tx);font-family:'DM Sans',sans-serif;font-size:13px;outline:none}
+.mfield input:focus{border-color:var(--bl)}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end}
+.btn-sec{background:transparent;border:1px solid var(--bd2);color:var(--mu);border-radius:7px;padding:8px 16px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-sec:hover{color:var(--tx)}
+
+/* ANALYTICS */
+.ana-bar{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.ana-source{display:flex;align-items:center;gap:7px;background:var(--s);border:1px solid var(--bd);border-radius:8px;padding:7px 14px;font-size:12px;color:var(--mu)}
+.ana-source b{color:var(--tx);font-weight:500}
+.ana-source .dot-smartico{width:7px;height:7px;border-radius:50%;background:var(--z);flex-shrink:0}
+.ana-source .dot-manual{width:7px;height:7px;border-radius:50%;background:var(--k);flex-shrink:0}
+.filter-row{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-row input,.filter-row select{background:var(--s2);border:1px solid var(--bd2);border-radius:7px;padding:7px 11px;color:var(--tx);font-family:'DM Sans',sans-serif;font-size:12px;outline:none}
+.filter-row input:focus,.filter-row select:focus{border-color:var(--bl)}
+.filter-row select option{background:var(--s2)}
+.filter-row label{font-size:11px;color:var(--mu)}
+.ana-summary{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:18px}
+.ana-card{background:var(--s);border:1px solid var(--bd);border-radius:11px;padding:13px}
+.ana-card-label{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.ana-card-val{font-family:'Bebas Neue',sans-serif;font-size:24px;line-height:1;color:var(--bl)}
+.ana-card-sub{font-size:10px;color:var(--dm);margin-top:3px}
+.tbl-wrap{background:var(--s);border:1px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:18px}
+.ana-table{width:100%;border-collapse:collapse}
+.ana-table th{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);padding:10px 14px;text-align:left;border-bottom:1px solid var(--bd);white-space:nowrap}
+.ana-table th.sort{cursor:pointer}.ana-table th.sort:hover{color:var(--tx)}
+.ana-table td{padding:11px 14px;font-size:12px;border-bottom:1px solid var(--bd)}
+.ana-table tr:last-child td{border-bottom:none}
+.ana-table tr:hover td{background:rgba(255,255,255,.02)}
+.casa-tag{display:inline-block;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:600}
+.num-cell{font-family:'DM Mono',monospace;font-size:11px}
+.num-cpa{color:var(--bl)}.num-rev{color:var(--z)}
+.btn-add-row{background:transparent;border:1px dashed var(--bd2);color:var(--mu);border-radius:7px;padding:9px 16px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;width:100%;margin-top:8px;transition:all .15s}
+.btn-add-row:hover{color:var(--tx);border-color:var(--bl)}
+.btn-exp{background:var(--s);border:1px solid var(--bd2);color:var(--mu);border-radius:7px;padding:7px 14px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:5px;transition:all .15s}
+.btn-exp:hover{color:var(--tx)}
+.empty{text-align:center;padding:60px 20px;color:var(--mu)}
+.empty h3{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.06em;color:var(--tx);margin-bottom:6px}
+.empty p{font-size:13px}
+.err-box{background:rgba(255,92,138,.06);border:1px solid rgba(255,92,138,.2);border-radius:8px;padding:12px 16px;font-size:13px;color:#ff8aaa;margin-bottom:12px}
+footer{border-top:1px solid var(--bd);padding:16px 24px;text-align:center;font-size:11px;color:var(--dm);position:relative;z-index:1}
+@media(max-width:900px){
+  .tabs .tab{font-size:10px;padding:5px 8px}
+  main{padding:14px}
+  .houses{grid-template-columns:repeat(2,1fr)}
+  .bets-layout{grid-template-columns:1fr}
+  .super-odds-grid{grid-template-columns:1fr}
+  .cg{grid-template-columns:1fr}
+  .acards{grid-template-columns:1fr}
+  .asum{grid-template-columns:repeat(2,1fr)}
+  .ana-summary{grid-template-columns:repeat(2,1fr)}
+  .calcg{grid-template-columns:1fr}
+  .calcres{grid-template-columns:1fr}
+  .so-body{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="logo" href="#">
+      <div class="lm"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#fff" stroke-width="2"/><path d="M8 4.5v3.5l2.5 2" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+      <div class="lt"><b>QXT</b>radar</div>
+    </a>
+    <div class="tabs">
+      <button class="tab on" onclick="showPage('dashboard',this)">Dashboard</button>
+      <button class="tab" onclick="showPage('bets',this)">Bets</button>
+      <button class="tab" onclick="showPage('criativos',this)">Criativos</button>
+      <button class="tab" onclick="showPage('calendario',this)">Calendário</button>
+      <button class="tab" onclick="showPage('afiliados',this)">Afiliados</button>
+      <button class="tab" onclick="showPage('analytics',this)">Analytics</button>
+    </div>
+    <div class="nr">
+      <div class="sp"><div class="sdot" id="sdot"></div><span id="stext">Aguardando</span></div>
+      <button class="btn-p" id="btnGo" onclick="runCurrentPage()">
+        <svg viewBox="0 0 14 14" fill="none"><path d="M7 1v2.5M7 1L5 3M7 1l2 2M13 7h-2.5M13 7l-2-2M13 7l-2 2M7 13v-2.5M7 13l-2-2M7 13l2-2M1 7h2.5M1 7l2-2M1 7l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span id="btnLabel">Atualizar</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="loadbar" id="loadbar"><div class="lbfill" id="lbfill"></div></div>
+
+  <!-- DASHBOARD -->
+  <div class="pg on" id="page-dashboard">
+    <div class="hero">
+      <div><div class="hlb">QXTradar — Monitor de Apostas & Afiliados</div><div class="hdt" id="heroDate"></div></div>
+      <div class="hmeta" id="heroMeta">Nenhuma busca realizada</div>
+    </div>
+    <div class="houses">
+      <div class="hcard" id="hc-zeroun"><div class="hdot" id="hd-zeroun"></div><div style="flex:1;min-width:0"><div class="hn">ZeroUm</div><div class="hst" id="hs-zeroun">Aguardando</div></div><div class="hct" id="hct-zeroun">—</div></div>
+      <div class="hcard" id="hc-jonbet"><div class="hdot" id="hd-jonbet"></div><div style="flex:1;min-width:0"><div class="hn">JonBet</div><div class="hst" id="hs-jonbet">Aguardando</div></div><div class="hct" id="hct-jonbet">—</div></div>
+      <div class="hcard" id="hc-betmgm"><div class="hdot" id="hd-betmgm"></div><div style="flex:1;min-width:0"><div class="hn">BETMGM</div><div class="hst" id="hs-betmgm">Aguardando</div></div><div class="hct" id="hct-betmgm">—</div></div>
+      <div class="hcard" id="hc-kto"><div class="hdot" id="hd-kto"></div><div style="flex:1;min-width:0"><div class="hn">KTO</div><div class="hst" id="hs-kto">Aguardando</div></div><div class="hct" id="hct-kto">—</div></div>
+    </div>
+    <div id="area-dashboard"><div class="empty"><div style="font-size:36px;margin-bottom:12px;opacity:.4">📡</div><h3>Pronto para monitorar</h3><p>Clique em "Atualizar" para buscar promoções em tempo real</p></div></div>
+  </div>
+
+  <!-- BETS -->
+  <div class="pg" id="page-bets">
+    <div class="hero">
+      <div><div class="hlb">Apostas do Dia</div><div class="hdt" id="bets-date"></div></div>
+      <div class="hmeta" id="bets-meta">—</div>
+    </div>
+    <div class="toggle-row">
+      <span class="toggle-label">Mostrar apostas de:</span>
+      <div class="toggle-wrap">
+        <button class="tgl on" onclick="setDiaBets('hoje',this)">Hoje</button>
+        <button class="tgl" onclick="setDiaBets('amanha',this)">Amanhã</button>
+      </div>
+    </div>
+    <div id="area-bets"><div class="empty"><div style="font-size:36px;margin-bottom:12px;opacity:.4">⚽</div><h3>Apostas do Dia</h3><p>Clique em "Atualizar" para gerar as 4 apostas com jogos reais</p></div></div>
+  </div>
+
+  <!-- CRIATIVOS -->
+  <div class="pg" id="page-criativos">
+    <div class="hero">
+      <div><div class="hlb">Criativos para Gravar</div><div class="hdt" id="cri-date"></div></div>
+      <div class="hmeta" id="cri-meta">—</div>
+    </div>
+    <div class="toggle-row">
+      <span class="toggle-label">Criativos de:</span>
+      <div class="toggle-wrap">
+        <button class="tgl on" onclick="setDiaCri('hoje',this)">Hoje</button>
+        <button class="tgl" onclick="setDiaCri('amanha',this)">Amanhã</button>
+      </div>
+    </div>
+    <div id="area-criativos"><div class="empty"><div style="font-size:36px;margin-bottom:12px;opacity:.4">🎬</div><h3>Criativos</h3><p>Clique em "Atualizar" para gerar 4 roteiros prontos para gravar</p></div></div>
+  </div>
+
+  <!-- CALENDÁRIO -->
+  <div class="pg" id="page-calendario">
+    <div class="calbar">
+      <div class="calmth" id="calmth">Abril 2026</div>
+      <div class="calnav">
+        <button class="nb" onclick="navCal(-1)">← Anterior</button>
+        <button class="nb" onclick="navCal(1)">Próximo →</button>
+        <button class="rb" onclick="fetchCal()">
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M7 1v2.5M7 1L5 3M7 1l2 2M13 7h-2.5M13 7l-2-2M13 7l-2 2M7 13v-2.5M7 13l-2-2M7 13l2-2M1 7h2.5M1 7l2-2M1 7l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Atualizar calendário
+        </button>
+      </div>
+    </div>
+    <div class="leg">
+      <div class="li"><div class="ld champ"></div>Champions</div><div class="li"><div class="ld prem"></div>Premier</div><div class="li"><div class="ld liga"></div>La Liga</div><div class="li"><div class="ld serA"></div>Serie A</div><div class="li"><div class="ld bund"></div>Bundesliga</div><div class="li"><div class="ld l1"></div>Ligue 1</div><div class="li"><div class="ld lib"></div>Libertadores</div><div class="li"><div class="ld sula"></div>Sul-Americana</div><div class="li"><div class="ld nord"></div>Copa Nordeste</div><div class="li"><div class="ld brA"></div>Brasileirão A</div><div class="li"><div class="ld brB"></div>Série B</div><div class="li"><div class="ld brC"></div>Série C</div><div class="li" style="border:1px solid rgba(255,92,138,.4);border-radius:3px;padding:0 4px"><div class="ld" style="background:#ff5c8a"></div>PE</div>
+    </div>
+    <div class="fts" id="calFts"></div>
+    <div id="area-calendario"><div class="empty"><div style="font-size:36px;margin-bottom:12px;opacity:.4">📅</div><h3>Calendário do Mês</h3><p>Clique em "Atualizar calendário" para carregar os jogos do mês</p></div></div>
+  </div>
+
+  <!-- AFILIADOS -->
+  <div class="pg" id="page-afiliados">
+    <div class="aff-topbar">
+      <div><div class="hlb">Gestão de Afiliados</div></div>
+      <button class="btn-add" onclick="openModal()">+ Adicionar Casa</button>
+    </div>
+    <div class="asum">
+      <div class="afm"><div class="aflb">Casas ativas</div><div class="afv" id="aff-total">4</div><div class="afsub" id="aff-names">ZeroUm · JonBet · BETMGM · KTO</div></div>
+      <div class="afm"><div class="aflb">Melhor CPA</div><div class="afv" id="aff-best-cpa">R$170</div><div class="afsub" id="aff-best-cpa-name">JonBet</div></div>
+      <div class="afm"><div class="aflb">Melhor RevShare</div><div class="afv" id="aff-best-rev">30%</div><div class="afsub" id="aff-best-rev-name">ZeroUm</div></div>
+      <div class="afm"><div class="aflb">Menor baseline</div><div class="afv" id="aff-best-base">R$20</div><div class="afsub" id="aff-best-base-name">JonBet · KTO</div></div>
+    </div>
+    <div class="acards" id="aff-cards"></div>
+    <div class="calcbox">
+      <div class="calctit">Calculadora de Receita</div>
+      <div class="calcg">
+        <div class="calcf"><label>Casa</label><select id="calc-casa" onchange="calcular()"></select></div>
+        <div class="calcf"><label>Conversões</label><input type="number" id="calc-conv" value="10" min="0" oninput="calcular()"></div>
+        <div class="calcf"><label>Receita líquida (R$)</label><input type="number" id="calc-rec" value="5000" min="0" oninput="calcular()"></div>
+        <div class="calcf"><label>Meses</label><input type="number" id="calc-mes" value="1" min="1" oninput="calcular()"></div>
+      </div>
+      <div class="calcres">
+        <div class="crbox"><div class="crl">CPA</div><div class="crv" id="rCPA">—</div><div class="crs">conv × CPA</div></div>
+        <div class="crbox"><div class="crl">RevShare</div><div class="crv" id="rRev">—</div><div class="crs">receita × %</div></div>
+        <div class="crbox"><div class="crl">Total</div><div class="crv" id="rTot" style="color:var(--bl)">—</div><div class="crs" id="rPer">no mês</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYTICS -->
+  <div class="pg" id="page-analytics">
+    <div class="hero">
+      <div><div class="hlb">Analytics de Afiliados</div></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div class="ana-source" id="anaSource"><div class="dot-manual"></div><b>Entrada manual</b> — conecte a Smartico nas configurações</div>
+        <button class="btn-exp" onclick="exportCSV()">
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M2 10v2h10v-2M7 2v7M4 6l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Exportar CSV
+        </button>
+      </div>
+    </div>
+    <div class="filter-row">
+      <label>De:</label><input type="date" id="f-from" onchange="renderAna()">
+      <label>Até:</label><input type="date" id="f-to" onchange="renderAna()">
+      <label>Casa:</label>
+      <select id="f-casa" onchange="renderAna()">
+        <option value="">Todas</option>
+      </select>
+      <button class="btn-p" style="padding:7px 14px;font-size:11px" onclick="loadSmartrico()">Sincronizar Smartico</button>
+    </div>
+    <div class="ana-summary">
+      <div class="ana-card"><div class="ana-card-label">Total Cliques</div><div class="ana-card-val" id="a-cliques">0</div><div class="ana-card-sub">no período</div></div>
+      <div class="ana-card"><div class="ana-card-label">Cadastros</div><div class="ana-card-val" id="a-cads">0</div><div class="ana-card-sub">no período</div></div>
+      <div class="ana-card"><div class="ana-card-label">FTDs</div><div class="ana-card-val" id="a-ftd">0</div><div class="ana-card-sub">no período</div></div>
+      <div class="ana-card"><div class="ana-card-label">Receita CPA</div><div class="ana-card-val" id="a-cpa" style="color:var(--bl)">R$0</div><div class="ana-card-sub">no período</div></div>
+      <div class="ana-card"><div class="ana-card-label">RevShare</div><div class="ana-card-val" id="a-rev" style="color:var(--z)">R$0</div><div class="ana-card-sub">no período</div></div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="ana-table" style="width:100%">
+        <thead>
+          <tr>
+            <th class="sort" onclick="sortAna('data')">Data ↕</th>
+            <th>Casa</th>
+            <th class="sort" onclick="sortAna('cliques')">Cliques ↕</th>
+            <th class="sort" onclick="sortAna('cadastros')">Cadastros ↕</th>
+            <th class="sort" onclick="sortAna('ftd')">FTD ↕</th>
+            <th class="sort" onclick="sortAna('deposito')">Depósito ↕</th>
+            <th class="sort" onclick="sortAna('cpa')">CPA ↕</th>
+            <th class="sort" onclick="sortAna('rev')">RevShare ↕</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="ana-tbody"></tbody>
+      </table>
+    </div>
+    <button class="btn-add-row" onclick="addAnaRow()">+ Adicionar linha manualmente</button>
+  </div>
+
+</main>
+
+<!-- MODAL adicionar casa -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-title">Adicionar Casa de Apostas</div>
+    <div class="modal-grid">
+      <div class="mfield" style="grid-column:1/-1"><label>Nome da Casa</label><input type="text" id="m-nome" placeholder="Ex: Betano"></div>
+      <div class="mfield"><label>CPA (R$)</label><input type="number" id="m-cpa" placeholder="0.00"></div>
+      <div class="mfield"><label>Baseline (R$)</label><input type="number" id="m-base" placeholder="0.00"></div>
+      <div class="mfield"><label>RevShare (%)</label><input type="number" id="m-rev" placeholder="0.00"></div>
+      <div class="mfield"><label>Cor (hex)</label><input type="text" id="m-cor" placeholder="#ff6600"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-sec" onclick="closeModal()">Cancelar</button>
+      <button class="btn-p" onclick="saveNewCasa()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<footer>QXTradar — monitor de apostas & afiliados · +18 · Jogue com responsabilidade · As apostas envolvem risco de perda financeira</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// ESTADO GLOBAL
+// ═══════════════════════════════════════════════════════
+const ACORDOS_INIT = [
+  {key:'zeroun',nome:'ZeroUm',cpa:40,base:25,rev:30,cor:'#00e5a0'},
+  {key:'jonbet',nome:'JonBet',cpa:170,base:20,rev:0,cor:'#7b5cff'},
+  {key:'betmgm',nome:'BETMGM',cpa:108.75,base:25,rev:18.13,cor:'#ff5c8a'},
+  {key:'kto',nome:'KTO',cpa:145,base:20,rev:10.88,cor:'#f0a500'},
+];
+
+let acordos = JSON.parse(localStorage.getItem('qxt_acordos') || 'null') || ACORDOS_INIT;
+let anaData = JSON.parse(localStorage.getItem('qxt_ana') || '[]');
+let calJogos = JSON.parse(localStorage.getItem('qxt_cal') || '[]');
+let lastPromos = {};
+
+let currentPage = 'dashboard';
+let diaBets = 'hoje';
+let diaCri = 'hoje';
+let calMes = new Date().getMonth() + 1;
+let calAno = new Date().getFullYear();
+let calFiltro = 'todos';
+let isLoading = false;
+let anaSortKey = 'data';
+let anaSortAsc = true;
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+document.getElementById('heroDate').textContent = new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+document.getElementById('bets-date').textContent = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+document.getElementById('cri-date').textContent = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+renderAffCards();
+calcular();
+renderAna();
+renderCalFts();
+if(calJogos.length) renderCal(calJogos);
+
+const today = new Date().toISOString().split('T')[0];
+const lastWeek = new Date(Date.now()-7*864e5).toISOString().split('T')[0];
+document.getElementById('f-from').value = lastWeek;
+document.getElementById('f-to').value = today;
+
+// ═══════════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════════
+const PAGE_BTNS = {dashboard:'Buscar Promoções',bets:'Buscar Apostas',criativos:'Gerar Criativos',calendario:'—',afiliados:'—',analytics:'—'};
+function showPage(p,el){
+  currentPage=p;
+  document.querySelectorAll('.pg').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.getElementById('page-'+p).classList.add('on');
+  el.classList.add('on');
+  document.getElementById('btnLabel').textContent = PAGE_BTNS[p]||'Atualizar';
+  document.getElementById('btnGo').style.display = ['afiliados','analytics','calendario'].includes(p)?'none':'flex';
+}
+
+function runCurrentPage(){
+  if(currentPage==='dashboard') fetchPromos();
+  else if(currentPage==='bets') fetchBets(diaBets);
+  else if(currentPage==='criativos') fetchCriativos(diaCri);
+}
+
+// ═══════════════════════════════════════════════════════
+// STATUS / LOADING
+// ═══════════════════════════════════════════════════════
+function setStatus(txt,state){
+  document.getElementById('stext').textContent=txt;
+  document.getElementById('sdot').className='sdot'+(state?' '+state:'');
+}
+function setBar(pct){
+  const b=document.getElementById('loadbar'),f=document.getElementById('lbfill');
+  if(pct===null){b.style.display='none';f.style.width='0%';}
+  else{b.style.display='block';f.style.width=pct+'%';}
+}
+function setHouse(key,status,count,color){
+  const k=key.toLowerCase().replace(/\s/g,'');
+  const st=document.getElementById('hs-'+k);
+  const dot=document.getElementById('hd-'+k);
+  const ct=document.getElementById('hct-'+k);
+  const card=document.getElementById('hc-'+k);
+  if(st)st.textContent=status;
+  if(dot&&color)dot.style.background=color;
+  if(ct){ct.textContent=count!==null?count:'—';ct.style.color=count!==null?color:'var(--dm)';}
+  if(card&&count!==null)card.className='hcard o'+k.charAt(0);
+}
+
+async function apiFetch(tipo,dia='hoje'){
+  if(isLoading)return null;
+  isLoading=true;
+  const btn=document.getElementById('btnGo');
+  btn.disabled=true;btn.classList.add('spin');
+  setStatus('Buscando...','loading');setBar(15);
+  try{
+    const r=await fetch('/api/relatorio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo,dia})});
+    setBar(80);
+    const d=await r.json();
+    if(!r.ok||d.error)throw new Error(d.error||'Erro');
+    setBar(null);setStatus('Atualizado '+new Date().toLocaleTimeString('pt-BR'),'live');
+    return d;
+  }catch(e){
+    setBar(null);setStatus('Erro','error');
+    return {error:e.message};
+  }finally{
+    isLoading=false;btn.disabled=false;btn.classList.remove('spin');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// DASHBOARD — PROMOÇÕES
+// ═══════════════════════════════════════════════════════
+async function fetchPromos(){
+  const d=await apiFetch('promocoes');
+  if(!d||d.error){document.getElementById('area-dashboard').innerHTML=`<div class="err-box">Erro: ${d?.error||'desconhecido'}</div>`;return;}
+  if(d.promocoes)d.promocoes.forEach(p=>{
+    const k=p.casa.toLowerCase().replace(/\s/g,'');
+    setHouse(k,p.itens.length+' promoções',p.itens.length,p.cor);
+  });
+  let html='';
+  if(d.promocoes){
+    d.promocoes.forEach(casa=>{
+      const cls=casa.casa.toLowerCase().replace(/\s/g,'');
+      html+=`<div class="sh"><div class="sl"></div><div class="stag t${cls.charAt(0)}">${casa.casa}</div><div class="sl"></div></div>`;
+      if(!casa.itens?.length){html+=`<p style="font-size:13px;color:var(--mu);text-align:center;padding:12px 0">Nenhuma promoção ativa</p>`;return;}
+      const prev=new Set((lastPromos[cls]||[]).map(x=>x.titulo));
+      html+=`<div class="pg3">`;
+      casa.itens.forEach((p,i)=>{ html+=`<div class="pc" style="animation:fadeUp .4s ${i*.06}s ease both"><div class="ptop"><span class="pty t${cls.charAt(0)}2">${p.tipo||'Promoção'}</span>${!prev.has(p.titulo)?'<span class="pnew">● NOVO</span>':''}</div><div class="ptit">${p.titulo}</div><div class="pdsc">${p.descricao}</div><div class="pft">${p.validade||'Consultar site'}</div></div>`; });
+      html+=`</div>`;
+      lastPromos[cls]=casa.itens;
+    });
+  }
+  if(d.financeiro){
+    const f=d.financeiro;
+    html+=`<div class="sh"><div class="sl"></div><div class="stag">Resumo Financeiro</div><div class="sl"></div></div>
+    <div class="asum" style="margin-bottom:14px">
+      <div class="afm"><div class="aflb">Melhor CPA hoje</div><div class="afv">R$${f.melhor_cpa?.valor?.toFixed(2)||'—'}</div><div class="afsub">${f.melhor_cpa?.casa||'—'}</div></div>
+      <div class="afm"><div class="aflb">CPA total 10 conv.</div><div class="afv">R$${(f.estimativa_10_conversoes||[]).reduce((s,x)=>s+x.cpa_total,0).toLocaleString('pt-BR',{maximumFractionDigits:0})}</div><div class="afsub">todas as casas</div></div>
+    </div>`;
+  }
+  document.getElementById('heroMeta').textContent='Atualizado '+new Date().toLocaleString('pt-BR');
+  document.getElementById('area-dashboard').innerHTML=html||'<div class="empty"><h3>Sem dados</h3><p>Tente novamente</p></div>';
+}
+document.head.insertAdjacentHTML('beforeend','<style>@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}</style>');
+
+// ═══════════════════════════════════════════════════════
+// BETS
+// ═══════════════════════════════════════════════════════
+function setDiaBets(dia,el){
+  diaBets=dia;
+  document.querySelectorAll('#page-bets .tgl').forEach(x=>x.classList.remove('on'));
+  el.classList.add('on');
+  fetchBets(dia);
+}
+
+async function fetchBets(dia='hoje'){
+  const d=await apiFetch('bets',dia);
+  if(!d||d.error){document.getElementById('area-bets').innerHTML=`<div class="err-box">Erro: ${d?.error||'desconhecido'}</div>`;return;}
+  renderBets(d,dia);
+}
+
+function renderBets(d,dia){
+  let html='';
+  // ODD100 e ODD10
+  html+=`<div class="bets-layout">`;
+  if(d.odd100) html+=buildBetBlock(d.odd100,'Odd ~100 · Alto Risco','pk',dia);
+  if(d.odd10)  html+=buildBetBlock(d.odd10,'Odd ~10 · Risco Médio','am',dia);
+  html+=`</div>`;
+
+  // SEGURA
+  if(d.oddSegura){
+    const s=d.oddSegura;
+    const cCls=s.casa_recomendada?.toLowerCase().replace(/\s/g,'')||'';
+    html+=`<div class="sh"><div class="sl"></div><div class="stag tbl">Aposta Segura · Odd 1.50–2.00</div><div class="sl"></div></div>`;
+    html+=`<div style="background:var(--s);border:1px solid var(--bd);border-radius:13px;overflow:hidden;margin-bottom:16px">`;
+    html+=`<div class="bet-head">
+      <div>
+        <div class="bet-type-row">
+          <span class="bet-type-label">7+ seleções · Múltipla segura</span>
+          <span class="casa-chip" style="color:${s.casa_cor||'#4a9eff'};border-color:${s.casa_cor||'#4a9eff'}30;background:${s.casa_cor||'#4a9eff'}10">${s.casa_recomendada||'—'}</span>
+        </div>
+        <div><span class="bet-odd-big gn">${Number(s.odd_total||0).toFixed(2)}</span><span class="bet-odd-sub">× odd total</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+        <div class="cbdg ca">Confiança alto</div>
+        <button class="btn-copy" onclick="copyBetSegura(this,'${(s.selecoes||[]).map(x=>x.jogo+' — '+x.mercado+' ('+x.odd+')').join(' | ').replace(/'/g,"\\'")}','${s.casa_recomendada||''}')">
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M2 10V2h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Copiar
+        </button>
+      </div>
+    </div>`;
+    if(s.motivo_casa) html+=`<div class="bet-motivo">💡 ${s.motivo_casa}</div>`;
+    html+=`<div class="segura-grid" style="padding:12px">`;
+    (s.selecoes||[]).forEach(sel=>{
+      html+=`<div class="seg-card">
+        <div class="seg-top"><div class="seg-odd">${Number(sel.odd).toFixed(2)}</div><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--mu)">${sel.hora}</span></div>
+        <div class="seg-jogo">${sel.jogo}</div>
+        <div class="seg-comp">${sel.competicao}</div>
+        <div class="seg-mercado">${sel.mercado}</div>
+        <div class="seg-analise">${sel.analise||''}</div>
+      </div>`;
+    });
+    html+=`</div></div>`;
+  }
+
+  // SUPER ODDS
+  if(d.superOdds?.length){
+    html+=`<div class="sh"><div class="sl"></div><div class="stag tbl">Super Odds do Dia</div><div class="sl"></div></div>`;
+    html+=`<div class="super-odds-grid">`;
+    d.superOdds.forEach(s=>{
+      const k=(s.casa||'').toLowerCase().replace(/\s/g,'');
+      html+=`<div class="so-card">
+        <div class="so-badge" style="background:${s.casa_cor||'#4a9eff'}">SUPER ODD</div>
+        <div class="so-head">
+          <div>
+            <div class="so-casa" style="color:${s.casa_cor||'#4a9eff'};border-color:${s.casa_cor||'#4a9eff'}30;background:${s.casa_cor||'#4a9eff'}10">${s.casa}</div>
+            <div class="so-jogo">${s.jogo}</div>
+            <div class="so-info">${s.competicao} · ${s.hora}</div>
+          </div>
+          <div>
+            <div class="so-odd-num">${Number(s.odd||0).toFixed(2)}</div>
+            ${s.odd_normal?`<div class="so-normal">Normal: ${Number(s.odd_normal).toFixed(2)}</div>`:''}
+          </div>
+        </div>
+        <div class="so-body">
+          <div class="so-fl"><label>Mercado</label><p>${s.mercado}</p></div>
+          <div class="so-fl"><label>Por que está boosted?</label><p>${s.descricao}</p></div>
+        </div>
+        <div class="so-footer">⚠ ${s.aviso||'Super odds são promocionais e podem ser retiradas a qualquer momento. +18.'}</div>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+
+  document.getElementById('bets-meta').textContent=(dia==='amanha'?'Amanhã':'Hoje')+' · atualizado '+new Date().toLocaleTimeString('pt-BR');
+  document.getElementById('area-bets').innerHTML=html||'<div class="empty"><h3>Sem dados</h3></div>';
+}
+
+function buildBetBlock(bet,label,oddCls,dia){
+  const cCls=(bet.casa_recomendada||'').toLowerCase().replace(/\s/g,'');
+  const jogosText=(bet.jogos||[]).map(j=>{
+    const mStr=(j.mercados||[]).map(m=>m.descricao+' ('+m.odd+')').join(' + ');
+    return j.time1+' × '+j.time2+': '+mStr;
+  }).join(' | ');
+
+  let jogosHtml='';
+  (bet.jogos||[]).forEach(j=>{
+    jogosHtml+=`<div class="jogo-card">
+      <div class="jogo-header">
+        <span class="jogo-hora">${j.hora}</span>
+        <span class="jogo-times">${j.time1} × ${j.time2}</span>
+        <span class="jogo-comp">${j.competicao}</span>
+        <span class="jogo-odd-total">${Number(j.odd_combinada_jogo||0).toFixed(2)}</span>
+      </div>
+      ${j.criar_aposta?'<div class="criar-badge"><svg width="10" height="10" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Criar Aposta</div>':''}
+      <div class="mercados-list">
+        ${(j.mercados||[]).map(m=>`<div class="mercado-row"><span class="mercado-desc">${m.descricao}</span><span class="mercado-odd">${Number(m.odd||0).toFixed(2)}</span></div>`).join('')}
+      </div>
+    </div>`;
+  });
+
+  return `<div class="bet-block">
+    <div class="bet-head">
+      <div class="bet-head-left">
+        <div class="bet-type-row">
+          <span class="bet-type-label">${label}</span>
+          <span class="casa-chip" style="color:${bet.casa_cor||'#4a9eff'};border-color:${bet.casa_cor||'#4a9eff'}30;background:${bet.casa_cor||'#4a9eff'}10">${bet.casa_recomendada||'—'}</span>
+        </div>
+        <div><span class="bet-odd-big ${oddCls}">${Number(bet.odd_total||0).toFixed(1)}</span><span class="bet-odd-sub">× total</span></div>
+      </div>
+      <div class="cbdg ${bet.nivel_confianca==='alto'?'ca':bet.nivel_confianca==='medio'?'cm':'cb'}">Confiança ${bet.nivel_confianca||'—'}</div>
+    </div>
+    ${bet.motivo_casa?`<div class="bet-motivo">💡 ${bet.motivo_casa}</div>`:''}
+    ${jogosHtml}
+    <div class="bet-footer">
+      <span class="bet-aviso">⚠ ${bet.aviso||'Aposte com responsabilidade. +18.'}</span>
+      <button class="btn-copy" onclick="copyBet(this,'${jogosText.replace(/'/g,"\\'")}','${(bet.casa_recomendada||'').replace(/'/g,"\\'")}','${bet.casa_cor||'#4a9eff'}')">
+        <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M2 10V2h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Copiar Aposta
+      </button>
+    </div>
+  </div>`;
+}
+
+function copyBet(btn,jogosText,casa,cor){
+  const txt=`📊 Aposta — ${casa}\n\n${jogosText.split(' | ').map((j,i)=>`${i+1}. ${j}`).join('\n')}\n\n⚠ Aposte com responsabilidade. +18.`;
+  navigator.clipboard.writeText(txt).then(()=>{
+    btn.textContent='✓ Copiado!';btn.classList.add('copied');
+    setTimeout(()=>{btn.innerHTML='<svg width="11" height="11" viewBox="0 0 14 14" fill="none"><rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M2 10V2h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Copiar Aposta';btn.classList.remove('copied');},2000);
+  });
+  // tenta abrir a casa
+  const urls={ZeroUm:'https://zeroum.bet',JonBet:'https://jonbet.com',BETMGM:'https://betmgm.com.br',KTO:'https://kto.com'};
+  if(urls[casa]) setTimeout(()=>window.open(urls[casa],'_blank'),500);
+}
+
+function copyBetSegura(btn,jogosText,casa){
+  copyBet(btn,jogosText,casa,'#00e5a0');
+}
+
+// ═══════════════════════════════════════════════════════
+// CRIATIVOS
+// ═══════════════════════════════════════════════════════
+function setDiaCri(dia,el){
+  diaCri=dia;
+  document.querySelectorAll('#page-criativos .tgl').forEach(x=>x.classList.remove('on'));
+  el.classList.add('on');
+  fetchCriativos(dia);
+}
+
+async function fetchCriativos(dia='hoje'){
+  const d=await apiFetch('criativos',dia);
+  if(!d||d.error){document.getElementById('area-criativos').innerHTML=`<div class="err-box">Erro: ${d?.error||'desconhecido'}</div>`;return;}
+  if(!d.criativos?.length){document.getElementById('area-criativos').innerHTML='<div class="empty"><h3>Sem criativos</h3><p>Tente novamente</p></div>';return;}
+  let html=`<div class="cg">`;
+  d.criativos.forEach((c,i)=>{
+    const cor=c.casa_cor||'#4a9eff';
+    html+=`<div class="cc" style="animation:fadeUp .4s ${i*.1}s ease both">
+      <div class="ch">
+        <div class="cn">0${c.numero}</div>
+        <div class="cr">
+          <span style="background:${cor}18;color:${cor};padding:2px 10px;border-radius:100px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em">${c.casa}</span>
+          <span style="background:var(--s2);color:var(--mu);padding:2px 8px;border-radius:100px;font-size:10px;border:1px solid var(--bd)">${c.formato||'Reels'}</span>
+        </div>
+      </div>
+      <div class="cbody">
+        <div class="cf"><label>Gancho (0–3s)</label><p>${c.gancho}</p></div>
+        <div class="cf"><label>Desenvolvimento</label><p>${c.desenvolvimento}</p></div>
+        <div class="cf cta"><label>Call to action</label><p>${c.cta}</p></div>
+        <div class="cf dk"><label>Dica de edição</label><p>${c.dica_edicao||'—'}</p>
+          ${c.duracao_estimada?`<span class="cf-dur">⏱ ${c.duracao_estimada}</span>`:''}
+        </div>
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+  document.getElementById('cri-meta').textContent=(dia==='amanha'?'Amanhã':'Hoje')+' · '+new Date().toLocaleTimeString('pt-BR');
+  document.getElementById('area-criativos').innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════════════
+// CALENDÁRIO
+// ═══════════════════════════════════════════════════════
+const MFULL=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const TCLS={champions:'champ',premier:'prem',laliga:'liga',seriea:'serA',bundesliga:'bund',ligue1:'l1',libertadores:'lib',sulamericana:'sula',brasileirao:'brA',serieb:'brB',seriec:'brC',nordeste:'nord',copabrasil:'brC',outros:'outros'};
+
+function navCal(d){calMes+=d;if(calMes>12){calMes=1;calAno++;}if(calMes<1){calMes=12;calAno--;}renderCal(calJogos);}
+function renderCalFts(){
+  const opts=[{k:'todos',l:'Todos'},{k:'dest',l:'⭐ Destaques'},{k:'pe',l:'🔴 PE — Sport/Náutico/Santa Cruz'},{k:'nord',l:'🔶 Copa do Nordeste'},{k:'europa',l:'🇪🇺 Europa'},{k:'sul',l:'🌎 Libertadores & Sul-Americana'},{k:'br',l:'🇧🇷 Futebol Brasileiro'}];
+  document.getElementById('calFts').innerHTML=opts.map(o=>`<button class="ft${calFiltro===o.k?' on':''}" onclick="setCalFt('${o.k}',this)">${o.l}</button>`).join('');
+}
+function setCalFt(f,el){calFiltro=f;document.querySelectorAll('.ft').forEach(x=>x.classList.remove('on'));el.classList.add('on');renderCal(calJogos);}
+
+async function fetchCal(){
+  const btn=document.querySelector('.rb');btn.textContent='Buscando...';
+  const d=await apiFetch('calendario','hoje');
+  btn.textContent='✓ Atualizar calendário';
+  if(!d||d.error){document.getElementById('area-calendario').innerHTML=`<div class="err-box">Erro: ${d?.error}</div>`;return;}
+  calJogos=d.jogos||[];
+  localStorage.setItem('qxt_cal',JSON.stringify(calJogos));
+  renderCal(calJogos);
+  setTimeout(()=>btn.innerHTML='<svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M7 1v2.5M7 1L5 3M7 1l2 2M13 7h-2.5M13 7l-2-2M13 7l-2 2M7 13v-2.5M7 13l-2-2M7 13l2-2M1 7h2.5M1 7l2-2M1 7l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/> </svg> Atualizar calendário',2000);
+}
+
+function renderCal(jogos){
+  document.getElementById('calmth').textContent=MFULL[calMes-1]+' '+calAno;
+  renderCalFts();
+  let filtered=(jogos||[]).filter(j=>{const m=parseInt((j.data||'').split('/')[1]);return m===calMes;});
+  if(calFiltro==='pe') filtered=filtered.filter(j=>j.pe||['sport','náutico','santa cruz'].some(n=>(j.time1+j.time2).toLowerCase().includes(n)));
+  else if(calFiltro==='dest') filtered=filtered.filter(j=>j.destaque);
+  else if(calFiltro==='nord') filtered=filtered.filter(j=>j.competicao_tipo==='nordeste');
+  else if(calFiltro==='europa') filtered=filtered.filter(j=>['champions','premier','laliga','seriea','bundesliga','ligue1'].includes(j.competicao_tipo));
+  else if(calFiltro==='sul') filtered=filtered.filter(j=>['libertadores','sulamericana'].includes(j.competicao_tipo));
+  else if(calFiltro==='br') filtered=filtered.filter(j=>['brasileirao','serieb','seriec','copabrasil'].includes(j.competicao_tipo));
+
+  const byD={};
+  filtered.forEach(j=>{const k=j.data+' · '+j.dia_semana;if(!byD[k]){byD[k]=[];}byD[k].push(j);});
+
+  if(!Object.keys(byD).length){document.getElementById('area-calendario').innerHTML='<div class="nores">Nenhum jogo encontrado neste filtro.</div>';return;}
+
+  let html='';
+  Object.entries(byD).forEach(([dl,list])=>{
+    html+=`<div class="dg"><div class="dl"><div class="dd">${dl}</div><div class="dline"></div><div class="dtot">${list.length} jogo${list.length!==1?'s':''}</div></div><div class="ms">`;
+    list.forEach(j=>{
+      const tipo=j.competicao_tipo||'outros';
+      const dotCls=TCLS[tipo]||'outros';
+      const isPE=['sport','náutico','santa cruz'].some(n=>(j.time1+' '+j.time2).toLowerCase().includes(n));
+      const isNord=tipo==='nordeste';
+      const base='mc'+(j.destaque?' hl':'')+(isPE?' pe':'')+(isNord?' nb2':'');
+      html+=`<div class="${base}">
+        <div class="mhora">${j.hora||'—'}</div>
+        <div class="cdot ${dotCls}"></div>
+        <div class="mb">
+          <div class="mc_comp">${j.competicao}</div>
+          <div class="mc_teams">${j.time1} × ${j.time2}</div>
+          <div class="mc_fase">${j.fase||''}</div>
+        </div>
+        <div class="mtags">
+          ${isPE?'<span class="tg pe">PE</span>':''}
+          ${isNord?'<span class="tg nd">Nordeste</span>':''}
+          ${j.destaque?'<span class="tg hl">⭐</span>':''}
+        </div>
+      </div>`;
+    });
+    html+=`</div></div>`;
+  });
+  document.getElementById('area-calendario').innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════════════
+// AFILIADOS
+// ═══════════════════════════════════════════════════════
+function renderAffCards(){
+  const el=document.getElementById('aff-cards');
+  if(!el)return;
+  el.innerHTML=acordos.map(a=>{
+    const bc=a.cor||'#4a9eff';
+    return `<div class="acard">
+      <div class="atop" style="border-top-color:${bc}"></div>
+      <div class="ahead">
+        <div class="aname" style="color:${bc}">${a.nome}</div>
+        <div class="abadge" style="background:${bc}18;color:${bc}">${a.rev>0?'CPA + RevShare':'Só CPA'}</div>
+      </div>
+      <div class="astats">
+        <div class="ast"><div class="astl">CPA</div><div class="astv" style="color:${bc}">R$${a.cpa}</div><div class="astd">por conversão</div></div>
+        <div class="ast"><div class="astl">Baseline</div><div class="astv" style="color:${bc}">R$${a.base}</div><div class="astd">depósito mínimo</div></div>
+        <div class="ast"><div class="astl">RevShare</div><div class="astv" style="color:${bc}">${a.rev>0?a.rev+'%':'—'}</div><div class="astd">receita líquida</div></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // update summary
+  const best=acordos.reduce((a,b)=>b.cpa>a.cpa?b:a,acordos[0]);
+  const bestRev=acordos.reduce((a,b)=>b.rev>a.rev?b:a,acordos[0]);
+  const bestBase=acordos.reduce((a,b)=>b.base<a.base?b:a,acordos[0]);
+  document.getElementById('aff-total').textContent=acordos.length;
+  document.getElementById('aff-names').textContent=acordos.map(a=>a.nome).join(' · ');
+  document.getElementById('aff-best-cpa').textContent='R$'+best.cpa;
+  document.getElementById('aff-best-cpa-name').textContent=best.nome;
+  document.getElementById('aff-best-rev').textContent=bestRev.rev+'%';
+  document.getElementById('aff-best-rev-name').textContent=bestRev.nome;
+  document.getElementById('aff-best-base').textContent='R$'+bestBase.base;
+  document.getElementById('aff-best-base-name').textContent=acordos.filter(a=>a.base===bestBase.base).map(a=>a.nome).join(' · ');
+
+  // update calc select
+  const sel=document.getElementById('calc-casa');
+  if(sel){sel.innerHTML=acordos.map(a=>`<option value="${a.key}">${a.nome}</option>`).join('');}
+
+  // update analytics filter
+  const sf=document.getElementById('f-casa');
+  if(sf){sf.innerHTML='<option value="">Todas</option>'+acordos.map(a=>`<option value="${a.nome}">${a.nome}</option>`).join('');}
+}
+
+function openModal(){document.getElementById('modalOverlay').classList.add('show');}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('show');}
+function saveNewCasa(){
+  const nome=document.getElementById('m-nome').value.trim();
+  if(!nome){alert('Informe o nome da casa.');return;}
+  const nova={key:nome.toLowerCase().replace(/\s/g,'_')+Date.now(),nome,cpa:parseFloat(document.getElementById('m-cpa').value)||0,base:parseFloat(document.getElementById('m-base').value)||0,rev:parseFloat(document.getElementById('m-rev').value)||0,cor:document.getElementById('m-cor').value||'#4a9eff'};
+  acordos.push(nova);
+  localStorage.setItem('qxt_acordos',JSON.stringify(acordos));
+  renderAffCards();calcular();closeModal();
+  ['m-nome','m-cpa','m-base','m-rev','m-cor'].forEach(id=>document.getElementById(id).value='');
+}
+
+function calcular(){
+  const sel=document.getElementById('calc-casa');
+  if(!sel)return;
+  const casa=acordos.find(a=>a.key===sel.value)||acordos[0];
+  if(!casa)return;
+  const conv=parseFloat(document.getElementById('calc-conv').value)||0;
+  const rec=parseFloat(document.getElementById('calc-rec').value)||0;
+  const mes=parseFloat(document.getElementById('calc-mes').value)||1;
+  const cpa=conv*casa.cpa*mes,rev=rec*(casa.rev/100)*mes,tot=cpa+rev;
+  const f=v=>'R$'+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('rCPA').textContent=f(cpa);
+  document.getElementById('rRev').textContent=f(rev);
+  document.getElementById('rTot').textContent=f(tot);
+  document.getElementById('rPer').textContent=mes===1?'no mês':`em ${mes} meses`;
+}
+
+// ═══════════════════════════════════════════════════════
+// ANALYTICS
+// ═══════════════════════════════════════════════════════
+function renderAna(){
+  const from=document.getElementById('f-from')?.value||'';
+  const to=document.getElementById('f-to')?.value||'';
+  const casa=document.getElementById('f-casa')?.value||'';
+  let rows=[...anaData];
+  if(from) rows=rows.filter(r=>r.data>=from);
+  if(to) rows=rows.filter(r=>r.data<=to);
+  if(casa) rows=rows.filter(r=>r.casa===casa);
+  rows.sort((a,b)=>{
+    const av=a[anaSortKey]||0,bv=b[anaSortKey]||0;
+    return anaSortAsc?(av>bv?1:-1):(av<bv?1:-1);
+  });
+  // summary
+  document.getElementById('a-cliques').textContent=rows.reduce((s,r)=>s+(r.cliques||0),0).toLocaleString('pt-BR');
+  document.getElementById('a-cads').textContent=rows.reduce((s,r)=>s+(r.cadastros||0),0).toLocaleString('pt-BR');
+  document.getElementById('a-ftd').textContent=rows.reduce((s,r)=>s+(r.ftd||0),0).toLocaleString('pt-BR');
+  const totCPA=rows.reduce((s,r)=>s+(r.cpa||0),0);
+  const totRev=rows.reduce((s,r)=>s+(r.rev||0),0);
+  document.getElementById('a-cpa').textContent='R$'+totCPA.toLocaleString('pt-BR',{minimumFractionDigits:2});
+  document.getElementById('a-rev').textContent='R$'+totRev.toLocaleString('pt-BR',{minimumFractionDigits:2});
+  // table
+  const tbody=document.getElementById('ana-tbody');
+  if(!tbody)return;
+  if(!rows.length){tbody.innerHTML=`<tr><td colspan="9" style="text-align:center;color:var(--mu);padding:32px;font-size:13px">Nenhum dado. Adicione linhas manualmente ou sincronize com a Smartico.</td></tr>`;return;}
+  const ac=acordos.find(a=>rows[0]&&a.nome===rows[0].casa)||null;
+  tbody.innerHTML=rows.map((r,i)=>{
+    const aCasa=acordos.find(a=>a.nome===r.casa);
+    const cor=aCasa?.cor||'#4a9eff';
+    const f2=v=>typeof v==='number'?v.toLocaleString('pt-BR',{minimumFractionDigits:2}):'—';
+    return `<tr>
+      <td class="num-cell">${r.data||'—'}</td>
+      <td><span class="casa-tag" style="background:${cor}18;color:${cor}">${r.casa||'—'}</span></td>
+      <td class="num-cell">${(r.cliques||0).toLocaleString('pt-BR')}</td>
+      <td class="num-cell">${(r.cadastros||0).toLocaleString('pt-BR')}</td>
+      <td class="num-cell">${(r.ftd||0).toLocaleString('pt-BR')}</td>
+      <td class="num-cell">R$${f2(r.deposito||0)}</td>
+      <td class="num-cell num-cpa">R$${f2(r.cpa||0)}</td>
+      <td class="num-cell num-rev">R$${f2(r.rev||0)}</td>
+      <td><button onclick="delAnaRow(${i})" style="background:transparent;border:none;color:var(--dm);cursor:pointer;font-size:12px;padding:2px 6px">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function sortAna(key){if(anaSortKey===key)anaSortAsc=!anaSortAsc;else{anaSortKey=key;anaSortAsc=true;}renderAna();}
+
+function addAnaRow(){
+  const casa=acordos[0]?.nome||'ZeroUm';
+  const hoje=new Date().toISOString().split('T')[0];
+  anaData.push({data:hoje,casa,cliques:0,cadastros:0,ftd:0,deposito:0,cpa:0,rev:0});
+  localStorage.setItem('qxt_ana',JSON.stringify(anaData));
+  renderAna();
+  // make last row editable inline
+  const rows=document.querySelectorAll('#ana-tbody tr');
+  const last=rows[rows.length-1];
+  if(last){
+    last.querySelectorAll('td').forEach((td,i)=>{
+      if(i===8)return;
+      td.contentEditable='true';
+      td.style.outline='1px solid rgba(74,158,255,.3)';
+      td.addEventListener('blur',()=>{
+        const idx=anaData.length-1;
+        const keys=['data','casa','cliques','cadastros','ftd','deposito','cpa','rev'];
+        const v=td.textContent.replace(/[R$,\.]/g,'').trim();
+        if(keys[i]==='casa')anaData[idx].casa=td.textContent.trim();
+        else if(keys[i]==='data')anaData[idx].data=td.textContent.trim();
+        else anaData[idx][keys[i]]=parseFloat(v)||0;
+        localStorage.setItem('qxt_ana',JSON.stringify(anaData));
+        td.contentEditable='false';td.style.outline='none';
+        renderAna();
+      });
+    });
+    last.querySelector('td')?.focus();
+  }
+}
+
+function delAnaRow(i){anaData.splice(i,1);localStorage.setItem('qxt_ana',JSON.stringify(anaData));renderAna();}
+
+function exportCSV(){
+  const rows=[['Data','Casa','Cliques','Cadastros','FTD','Depósito','CPA','RevShare'],...anaData.map(r=>[r.data,r.casa,r.cliques,r.cadastros,r.ftd,r.deposito,r.cpa,r.rev])];
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='qxtradar-analytics.csv';a.click();
+}
+
+async function loadSmartrico(){
+  const from=document.getElementById('f-from').value;
+  const to=document.getElementById('f-to').value;
+  setStatus('Sincronizando Smartico...','loading');
+  try{
+    const r=await fetch('/api/analytics',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date_from:from,date_to:to})});
+    const d=await r.json();
+    if(d.source==='smartico'&&d.data?.length){
+      anaData=[...anaData,...d.data];
+      localStorage.setItem('qxt_ana',JSON.stringify(anaData));
+      document.getElementById('anaSource').innerHTML=`<div class="dot-smartico"></div><b>Smartico conectada</b> — ${d.data.length} registros importados`;
+      setStatus('Smartico sincronizada','live');
+    } else {
+      setStatus('Smartico: sem dados (configure SMARTICO_API_KEY na Vercel)','error');
+    }
+  }catch(e){setStatus('Erro Smartico','error');}
+  renderAna();
+}
+</script>
+</body>
+</html>
