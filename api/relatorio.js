@@ -6,158 +6,44 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'ANTHROPIC_API_KEY não configurada.' });
+  if (!apiKey) return res.status(500).json({ error: 'ANTHROPIC_API_KEY nao configurada.' });
 
   const { tipo = 'bets', dia = 'hoje' } = req.body || {};
   const hoje = new Date();
   const amanha = new Date(hoje); amanha.setDate(amanha.getDate() + 1);
-  const fmtData = (d) => d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
-  const dataAlvo = dia === 'amanha' ? fmtData(amanha) : fmtData(hoje);
+  const fmt = (d) => d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+  const dataAlvo = dia === 'amanha' ? fmt(amanha) : fmt(hoje);
   const mesAno = hoje.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
   const prompts = {
-
-    bets: `Você é especialista em apostas esportivas. A data alvo é ${dataAlvo}.
-Use web search para buscar jogos REAIS de futebol dessa data em todas as ligas mundiais.
-
-REGRAS IMPORTANTES:
-1. Para cada aposta, especifique QUAL CASA (ZeroUm, JonBet, BETMGM ou KTO) é recomendada para aquele bilhete, baseado em qual tem melhores odds para aquelas seleções.
-2. Use "criar aposta" — combine múltiplos mercados do MESMO jogo para aumentar a odd (ex: Bayern vence + mais de 1.5 gols na partida = odd combinada mais alta).
-3. Odd ~100: precisa de pelo menos 8-10 seleções combinando criar aposta e múltiplas partidas.
-4. Odd ~10: precisa de 4-5 seleções com mercados alternativos (handicap, over/under, cartões, etc).
-5. Busque super odds boosted disponíveis hoje em ZeroUm, JonBet, BETMGM e KTO — tente encontrar pelo menos uma por casa.
-
-Responda APENAS JSON puro sem markdown:
-{
-  "data": "${dataAlvo}",
-  "odd100": {
-    "casa_recomendada": "string (ZeroUm|JonBet|BETMGM|KTO)",
-    "casa_cor": "string hex",
-    "odd_total": 0,
-    "nivel_confianca": "baixo",
-    "motivo_casa": "string (por que essa casa para esse bilhete)",
-    "jogos": [
-      {
-        "hora": "string",
-        "time1": "string",
-        "time2": "string",
-        "competicao": "string",
-        "mercados": [
-          {"descricao": "string (ex: Bayern vence)", "odd": 0},
-          {"descricao": "string (ex: +1.5 gols no jogo)", "odd": 0}
-        ],
-        "odd_combinada_jogo": 0,
-        "criar_aposta": true
-      }
-    ],
-    "aviso": "string"
-  },
-  "odd10": {
-    "casa_recomendada": "string",
-    "casa_cor": "string hex",
-    "odd_total": 0,
-    "nivel_confianca": "medio",
-    "motivo_casa": "string",
-    "jogos": [
-      {
-        "hora": "string",
-        "time1": "string",
-        "time2": "string",
-        "competicao": "string",
-        "mercados": [
-          {"descricao": "string", "odd": 0}
-        ],
-        "odd_combinada_jogo": 0,
-        "criar_aposta": false
-      }
-    ],
-    "aviso": "string"
-  },
-  "oddSegura": {
-    "casa_recomendada": "string",
-    "casa_cor": "string hex",
-    "odd_total": 0,
-    "nivel_confianca": "alto",
-    "motivo_casa": "string",
-    "selecoes": [
-      {"hora": "string", "jogo": "string", "competicao": "string", "mercado": "string", "odd": 0, "analise": "string curta"}
-    ],
-    "aviso": "string"
-  },
-  "superOdds": [
-    {
-      "casa": "string (ZeroUm|JonBet|BETMGM|KTO)",
-      "casa_cor": "string hex",
-      "odd": 0,
-      "jogo": "string",
-      "competicao": "string",
-      "hora": "string",
-      "mercado": "string",
-      "odd_normal": 0,
-      "descricao": "string (por que está boosted e quanto acima do normal)",
-      "aviso": "string"
-    }
-  ]
-}`,
-
-    criativos: `Especialista em marketing de apostas. Data alvo: ${dataAlvo}. Use web search para saber os jogos importantes dessa data.
-
-Crie 4 roteiros (30-60s) para redes sociais, um por casa: ZeroUm, JonBet, BETMGM, KTO. Responda JSON puro:
-{
-  "data": "${dataAlvo}",
-  "criativos": [
-    {
-      "numero": 1,
-      "casa": "string",
-      "casa_cor": "string hex",
-      "formato": "string",
-      "gancho": "string (primeiros 3 segundos impactantes)",
-      "desenvolvimento": "string (o que falar e mostrar)",
-      "cta": "string (call to action com link na bio)",
-      "dica_edicao": "string",
-      "duracao_estimada": "string (ex: 45 segundos)"
-    }
-  ]
-}`,
-
-    promocoes: `Busque promoções ativas hoje (${dataAlvo}) de ZeroUm, JonBet, BETMGM e KTO apostas Brasil. JSON puro:
-{
-  "data": "${dataAlvo}",
-  "promocoes": [
-    {"casa": "string", "cor": "string", "itens": [{"titulo": "string", "descricao": "string", "tipo": "string", "validade": "string"}]}
-  ],
-  "financeiro": {
-    "melhor_cpa": {"casa": "string", "valor": 0},
-    "estimativa_10_conversoes": [{"casa": "string", "cpa_total": 0, "rev_estimado": 0, "total": 0}]
-  }
-}`,
-
-    calendario: `Especialista em futebol. Hoje é ${dataAlvo}. Busque no sofascore.com e resultados.com os principais jogos do mês ${mesAno}. Inclua TODOS os jogos: Champions, Premier, La Liga, Serie A, Bundesliga, Ligue 1, Brasileirao, Serie B, Serie C, Libertadores, Sul-Americana, Copa do Nordeste, Copa do Brasil, Copa do Mundo de Clubes. Inclua SEMPRE jogos de Sport Recife, Náutico e Santa Cruz. Retorne JSON puro:
-{"mes":"string","ano":"string","jogos":[{"data":"DD/MM","dia_semana":"string","competicao":"string","competicao_tipo":"champions|premier|laliga|seriea|bundesliga|ligue1|libertadores|sulamericana|brasileirao|serieb|seriec|nordeste|copabrasil|outros","time1":"string","time2":"string","hora":"string","fase":"string","destaque":true}]}`
+    bets: `Especialista em apostas. Data: ${dataAlvo}. Busque jogos reais de futebol. Informe qual casa (ZeroUm, JonBet, BETMGM ou KTO) tem melhor odd para cada bilhete. Use criar_aposta:true para combinar mercados do mesmo jogo. Odd100: 6-8 jogos. Odd10: 3-4 jogos com handicap. OddSegura: 7 selecoes odds 1.5-2.0. SuperOdds: uma boosted por casa. RETORNE APENAS JSON VALIDO SEM NENHUM TEXTO ANTES OU DEPOIS: {"data":"${dataAlvo}","odd100":{"casa_recomendada":"JonBet","casa_cor":"#7b5cff","odd_total":95.0,"nivel_confianca":"baixo","motivo_casa":"melhores odds hoje","jogos":[{"hora":"16:00","time1":"Time A","time2":"Time B","competicao":"Liga","mercados":[{"descricao":"Time A vence","odd":1.44},{"descricao":"Mais de 1.5 gols","odd":1.55}],"odd_combinada_jogo":2.23,"criar_aposta":true}],"aviso":"Aposte com responsabilidade. +18."},"odd10":{"casa_recomendada":"BETMGM","casa_cor":"#ff5c8a","odd_total":10.0,"nivel_confianca":"medio","motivo_casa":"Lucro Turbinado disponivel","jogos":[{"hora":"19:00","time1":"Time C","time2":"Time D","competicao":"Liga","mercados":[{"descricao":"Time C vence","odd":2.10}],"odd_combinada_jogo":2.10,"criar_aposta":false}],"aviso":"Verifique odds antes. +18."},"oddSegura":{"casa_recomendada":"ZeroUm","casa_cor":"#00e5a0","odd_total":15.0,"nivel_confianca":"alto","motivo_casa":"cashback 10% se perder","selecoes":[{"hora":"16:00","jogo":"Time A x Time B","competicao":"Liga","mercado":"Time A vence","odd":1.44,"analise":"Favorito em casa"}],"aviso":"Aposte com responsabilidade. +18."},"superOdds":[{"casa":"JonBet","casa_cor":"#7b5cff","odd":4.20,"jogo":"Time A x Time B","competicao":"Liga","hora":"16:00","mercado":"Mercado boosted","odd_normal":3.80,"descricao":"Odd promocional","aviso":"Pode ser retirada. +18."}]}`,
+    criativos: `Marketing de apostas. Data: ${dataAlvo}. Busque jogos importantes. Crie 4 roteiros para redes sociais, um por casa: ZeroUm, JonBet, BETMGM, KTO. RETORNE APENAS JSON VALIDO SEM TEXTO ANTES OU DEPOIS: {"data":"${dataAlvo}","criativos":[{"numero":1,"casa":"ZeroUm","casa_cor":"#00e5a0","formato":"Reels","gancho":"string","desenvolvimento":"string","cta":"string","dica_edicao":"string","duracao_estimada":"45 segundos"},{"numero":2,"casa":"JonBet","casa_cor":"#7b5cff","formato":"Stories","gancho":"string","desenvolvimento":"string","cta":"string","dica_edicao":"string","duracao_estimada":"30 segundos"},{"numero":3,"casa":"BETMGM","casa_cor":"#ff5c8a","formato":"TikTok","gancho":"string","desenvolvimento":"string","cta":"string","dica_edicao":"string","duracao_estimada":"40 segundos"},{"numero":4,"casa":"KTO","casa_cor":"#f0a500","formato":"YouTube Shorts","gancho":"string","desenvolvimento":"string","cta":"string","dica_edicao":"string","duracao_estimada":"55 segundos"}]}`,
+    promocoes: `Busque promocoes ativas hoje de ZeroUm, JonBet, BETMGM e KTO apostas Brasil. RETORNE APENAS JSON VALIDO SEM TEXTO ANTES OU DEPOIS: {"data":"${dataAlvo}","promocoes":[{"casa":"ZeroUm","cor":"#00e5a0","itens":[{"titulo":"string","descricao":"string","tipo":"Cashback","validade":"string"}]},{"casa":"JonBet","cor":"#7b5cff","itens":[{"titulo":"string","descricao":"string","tipo":"Bonus","validade":"string"}]},{"casa":"BETMGM","cor":"#ff5c8a","itens":[{"titulo":"string","descricao":"string","tipo":"Sorteio","validade":"string"}]},{"casa":"KTO","cor":"#f0a500","itens":[{"titulo":"string","descricao":"string","tipo":"Cashback","validade":"string"}]}],"financeiro":{"melhor_cpa":{"casa":"JonBet","valor":170},"estimativa_10_conversoes":[{"casa":"ZeroUm","cpa_total":400,"rev_estimado":150,"total":550}]}}`,
+    calendario: `Futebol. Mes: ${mesAno}. Busque jogos no sofascore.com. Inclua todas as ligas e sempre Sport Recife, Nautico e Santa Cruz. RETORNE APENAS JSON VALIDO SEM TEXTO ANTES OU DEPOIS: {"mes":"Abril","ano":"2026","jogos":[{"data":"15/04","dia_semana":"Qua","competicao":"Champions League","competicao_tipo":"champions","time1":"Bayern","time2":"Real Madrid","hora":"16:00","fase":"Quartas","destaque":true}]}`
   };
+
+  const maxTokens = { bets: 4000, criativos: 3000, promocoes: 3000, calendario: 5000 };
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 8000,
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: maxTokens[tipo] || 3000,
         tools: [{ type: 'web_search_20250305', name: 'web_search' }],
         messages: [{ role: 'user', content: prompts[tipo] || prompts.bets }]
       })
     });
-
     if (!response.ok) {
       const err = await response.text();
-      return res.status(response.status).json({ error: `Erro Anthropic: ${err.slice(0, 200)}` });
+      return res.status(response.status).json({ error: `Erro Anthropic: ${err.slice(0, 300)}` });
     }
-
     const data = await response.json();
     const textContent = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
     const start = textContent.indexOf('{');
     const end = textContent.lastIndexOf('}');
-    if (start === -1) return res.status(500).json({ error: 'JSON não encontrado', raw: textContent.slice(0, 300) });
+    if (start === -1) return res.status(500).json({ error: 'JSON nao encontrado', raw: textContent.slice(0, 300) });
     return res.status(200).json(JSON.parse(textContent.slice(start, end + 1)));
   } catch (err) {
     return res.status(500).json({ error: err.message });
